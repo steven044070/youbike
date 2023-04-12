@@ -13,8 +13,18 @@ def getInfo():
         sarea_temp.add(item['sarea'])
     sarea_list = sorted(list(sarea_temp))
 
-def getInfoFromArea(areaName):
+def getInfoFromArea(areaName) -> list:
     filter_data = filter(lambda n:n['sarea']==areaName,data_list)
+    return list(filter_data)
+
+
+def filter_sbi_warning_data(area_data, numbers) -> list:
+    filter_data = filter(lambda n: n['sbi'] <= numbers, area_data)
+    return list(filter_data)
+
+
+def filter_bemp_warning_data(area_data, numbers) -> list:
+    filter_data = filter(lambda n: n['bemp'] <= numbers, area_data)
     return list(filter_data)
 
 getInfo()
