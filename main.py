@@ -3,6 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 import datetime
 from tkinter.simpledialog import askinteger
+from PIL import Image, ImageTk
+from messageWindow import MapDisplay
 
 sbi_numbers = 3
 bemp_numbers = 3
@@ -19,9 +21,24 @@ class Window(tk.Tk):
             label="設定", command=self.menu_setting_click)
         self.command_menu.add_command(label="離開", command=self.destroy)
         self.menubar.add_cascade(label="File", menu=self.command_menu)
+        self.command_menu = tk.Menu(self.menubar)
+        self.command_menu.add_command(
+            label="搜尋", command=self.menu_search_click)
+        self.menubar.add_cascade(label="Search", menu=self.command_menu)
+
+        #main Frame
+        mainFrame = ttk.Frame(self)
+        mainFrame.pack(padx=30,pady=50)
+
+        # logoLabel top of top_wrapperFrame
+        logoImage = Image.open('pic1.png')
+        resizeImage = logoImage.resize((389, 129), Image.LANCZOS)
+        self.logoTkimage = ImageTk.PhotoImage(resizeImage)
+        logoLabel = ttk.Label(mainFrame, image=self.logoTkimage)
+        logoLabel.pack(pady=(0, 50))
 
 # top_wrapperFrame=================
-        top_wrapperFrame = ttk.Frame(self)
+        top_wrapperFrame = ttk.Frame(mainFrame)
         top_wrapperFrame.pack(fill=tk.X)
 # topFrame_start===================
         topFrame = ttk.LabelFrame(top_wrapperFrame, text="台北市行政區")
@@ -98,7 +115,7 @@ class Window(tk.Tk):
         now = datetime.datetime.now()
         # display current datetime
         nowString = now.strftime("%Y-%m-%d %H:%M:%S")
-        self.bottomFrame = ttk.LabelFrame(self, text=f"中山區-{nowString}")
+        self.bottomFrame = ttk.LabelFrame(mainFrame, text=f"中山區-{nowString}")
         self.bottomFrame.pack()
 
 # 製作bottomFrame介面
@@ -120,9 +137,13 @@ class Window(tk.Tk):
         self.tree.column("#7", minwidth=0, width=30)
         self.tree.pack(side=tk.LEFT)
 
+        #self.tree, addItem
         for item in self.area_data:
             self.tree.insert('', tk.END, values=[
-                        item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']])
+                item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']], tags=item['sna'])
+
+        # self.tree bind event
+        self.tree.bind('<<TreeviewSelect>>', self.treeSelected)
 
         # 製作treeview的scrollbar
         scrollbar = ttk.Scrollbar(self.bottomFrame,command=self.tree.yview)
@@ -166,7 +187,7 @@ class Window(tk.Tk):
         # Display data in tree view
         for item in self.area_data:
             self.tree.insert('', tk.END, values=[
-                item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']])
+                item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']],tags=item['sna'])
 
         for item in self.sbi_warning_data:
             self.sbi_tree.insert('', tk.END, values=[
@@ -175,6 +196,21 @@ class Window(tk.Tk):
         for item in self.bemp_warning_data:
             self.bemp_tree.insert('', tk.END, values=[
                                 item['sna'][11:], item['sbi'], item['bemp']])
+
+    def treeSelected(self, event):
+        selectedTree = event.widget
+        if len(selectedTree.selection()) == 0:return
+        itemTag = selectedTree.selection()[0]
+        itemDic = selectedTree.item(itemTag)
+        siteName = itemDic['tags'][0]
+        for item in self.area_data:
+            if siteName == item['sna']:
+                select_data = item
+                break
+        
+        #顯示地圖的window
+        mapdisplay = MapDisplay(self,select_data)
+
     #menu事件
     def menu_setting_click(self):
         global sbi_numbers, bemp_numbers
@@ -183,6 +219,9 @@ class Window(tk.Tk):
                             minvalue=0, maxvalue=5)
         sbi_numbers = retVal
         bemp_numbers = retVal
+
+    def menu_search_click(self):
+        retVal = askinteger(f'站點搜尋','請輸入名稱')
 
 def main():
     window = Window()
