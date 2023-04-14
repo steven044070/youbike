@@ -2,7 +2,7 @@ import datasource
 import tkinter as tk
 from tkinter import ttk
 import datetime
-from tkinter.simpledialog import askinteger
+from tkinter.simpledialog import askinteger, askstring
 from PIL import Image, ImageTk
 from messageWindow import MapDisplay
 
@@ -16,15 +16,16 @@ class Window(tk.Tk):
         self.menubar = tk.Menu(self)
         self.config(menu=self.menubar)
         # add command menu in menubar
-        self.command_menu = tk.Menu(self.menubar)
+        self.command_menu = tk.Menu(self.menubar, tearoff=0)
         self.command_menu.add_command(
             label="設定", command=self.menu_setting_click)
         self.command_menu.add_command(label="離開", command=self.destroy)
         self.menubar.add_cascade(label="File", menu=self.command_menu)
-        self.command_menu = tk.Menu(self.menubar)
-        self.command_menu.add_command(
-            label="搜尋", command=self.menu_search_click)
-        self.menubar.add_cascade(label="Search", menu=self.command_menu)
+
+        self.command02_menu = tk.Menu(self.menubar, tearoff=0)
+        self.command02_menu.add_command(
+            label='查詢', command=self.menu_search_click)
+        self.menubar.add_cascade(label='查詢', menu=self.command02_menu)
 
         #main Frame
         mainFrame = ttk.Frame(self)
@@ -221,7 +222,13 @@ class Window(tk.Tk):
         bemp_numbers = retVal
 
     def menu_search_click(self):
-        retVal = askinteger(f'站點搜尋','請輸入名稱')
+        retVal = askstring('站點搜尋', '請輸入名稱')
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+        for item in self.area_data:
+            if retVal in item['sna'] or retVal in item['ar']:
+                self.tree.insert('', tk.END, values=[
+                                item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']], tags=item['sna'])
 
 def main():
     window = Window()
