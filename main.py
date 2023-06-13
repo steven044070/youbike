@@ -32,7 +32,7 @@ class Window(tk.Tk):
         mainFrame.pack(padx=30,pady=50)
 
         # logoLabel top of top_wrapperFrame
-        logoImage = Image.open('pic1.png')
+        logoImage = Image.open('./image/img1.png')
         resizeImage = logoImage.resize((389, 129), Image.LANCZOS)
         self.logoTkimage = ImageTk.PhotoImage(resizeImage)
         logoLabel = ttk.Label(mainFrame, image=self.logoTkimage)
@@ -63,9 +63,9 @@ class Window(tk.Tk):
         self.sbi_tree.heading('#1', text='站點')
         self.sbi_tree.column("#1", minwidth=0, width=200)
         self.sbi_tree.heading('#2', text='可借')
-        self.sbi_tree.column("#2", minwidth=0, width=30)
+        self.sbi_tree.column("#2", minwidth=0, width=40)
         self.sbi_tree.heading('#3', text='可還')
-        self.sbi_tree.column("#3", minwidth=0, width=30)
+        self.sbi_tree.column("#3", minwidth=0, width=40)
         self.sbi_tree.pack(side=tk.LEFT)
         self.sbi_warning_data = datasource.filter_sbi_warning_data(
             self.area_data, sbi_numbers)
@@ -91,9 +91,9 @@ class Window(tk.Tk):
         self.bemp_tree.heading('#1', text='站點')
         self.bemp_tree.column("#1", minwidth=0, width=200)
         self.bemp_tree.heading('#2', text='可借')
-        self.bemp_tree.column("#2", minwidth=0, width=30)
+        self.bemp_tree.column("#2", minwidth=0, width=40)
         self.bemp_tree.heading('#3', text='可還')
-        self.bemp_tree.column("#3", minwidth=0, width=30)
+        self.bemp_tree.column("#3", minwidth=0, width=40)
         self.bemp_tree.pack(side=tk.LEFT)
         self.bemp_warning_data = datasource.filter_bemp_warning_data(
             self.area_data, bemp_numbers)
@@ -123,19 +123,19 @@ class Window(tk.Tk):
         columns = ('#1', '#2', '#3', '#4', '#5', '#6', '#7')
         self.tree = ttk.Treeview(self.bottomFrame, columns=columns, show='headings')
         self.tree.heading('#1', text='站點')
-        self.tree.column("#1", minwidth=0, width=200)
+        self.tree.column("#1", minwidth=0, width=170)
         self.tree.heading('#2', text='時間')
-        self.tree.column("#2", minwidth=0, width=200)
+        self.tree.column("#2", minwidth=0, width=150)
         self.tree.heading('#3', text='總車數')
         self.tree.column("#3", minwidth=0, width=50)
         self.tree.heading('#4', text='可借')
-        self.tree.column("#4", minwidth=0, width=30)
+        self.tree.column("#4", minwidth=0, width=40)
         self.tree.heading('#5', text='可還')
-        self.tree.column("#5", minwidth=0, width=30)
+        self.tree.column("#5", minwidth=0, width=40)
         self.tree.heading('#6', text='地址')
         self.tree.column("#6", minwidth=0, width=250)
-        self.tree.heading('#7', text='狀態')
-        self.tree.column("#7", minwidth=0, width=30)
+        self.tree.heading('#7', text='狀態(1:開放,0:未開放)')
+        self.tree.column("#7", minwidth=0, width=150)
         self.tree.pack(side=tk.LEFT)
 
         #self.tree, addItem
@@ -198,6 +198,7 @@ class Window(tk.Tk):
             self.bemp_tree.insert('', tk.END, values=[
                                 item['sna'][11:], item['sbi'], item['bemp']])
 
+    #點擊treeview事件
     def treeSelected(self, event):
         selectedTree = event.widget
         if len(selectedTree.selection()) == 0:return
@@ -207,8 +208,8 @@ class Window(tk.Tk):
         for item in self.area_data:
             if siteName == item['sna']:
                 select_data = item
-                break
-        
+                break        
+
         #顯示地圖的window
         mapdisplay = MapDisplay(self,select_data)
 
@@ -223,12 +224,15 @@ class Window(tk.Tk):
 
     def menu_search_click(self):
         retVal = askstring('站點搜尋', '請輸入名稱')
-        for item in self.tree.get_children():
-            self.tree.delete(item)
-        for item in self.area_data:
-            if retVal in item['sna'] or retVal in item['ar']:
-                self.tree.insert('', tk.END, values=[
-                                item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']], tags=item['sna'])
+        try:
+            for item in self.tree.get_children():
+                self.tree.delete(item)
+            for item in self.area_data:
+                if retVal in item['sna'] or retVal in item['ar']:
+                    self.tree.insert('', tk.END, values=[
+                                    item['sna'][11:], item['mday'], item['tot'], item['sbi'], item['bemp'], item['ar'], item['act']], tags=item['sna'])
+        except:
+            pass
 
 def main():
     window = Window()
